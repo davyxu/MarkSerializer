@@ -1,0 +1,6 @@
+*.suo
+*.user
+/MarkSerializer/bin
+/MarkSerializer/obj
+/UnitTest/bin
+/UnitTest/obj
