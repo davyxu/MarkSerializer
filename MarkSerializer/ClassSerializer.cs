@@ -8,7 +8,7 @@ namespace MarkSerializer
     {
         public override bool Match(Type ft)
         {
-            return ft.IsClass;
+            return ft.IsClass || ft.IsValueType;
         }
 
         public override void Serialize(BinarySerializer ser, object ins)

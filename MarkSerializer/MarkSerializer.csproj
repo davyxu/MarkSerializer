@@ -45,6 +45,7 @@
     <Compile Include="GenericListSerializer.cs" />
     <Compile Include="EnumSerializer.cs" />
     <Compile Include="Float32Serializer.cs" />
+    <Compile Include="BoolSerializer.cs" />
     <Compile Include="Integer32Serializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StringSerializer.cs" />

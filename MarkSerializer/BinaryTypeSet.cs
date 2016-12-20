@@ -21,9 +21,11 @@ namespace MarkSerializer
 
         public static void RegisterBuiltinTypes()
         {
+            // 顺序不要随便调整
             Register(new Integer32Serializer());
             Register(new StringSerializer());
             Register(new Float32Serializer());
+            Register(new BoolSerializer());
             Register(new GenericListSerializer());
             Register(new GenericDictSerializer());
             Register(new ArraySerializer());
