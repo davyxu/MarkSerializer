@@ -16,23 +16,14 @@ namespace MarkSerializer
             Type ft = ins.GetType();
 
             ser.Serialize<string>(ft.FullName);
-
-            int serfieldCount = 0;
-
-            // 只遍历私有成员
-            foreach (var mi in ft.GetFields(BindingFlags.NonPublic |BindingFlags.Public |BindingFlags.Instance))
+           
+            var cls = ins as IMarkSerializable;
+            if (cls == null)
             {
-                if (mi.IsDefined(typeof(MarkSerializeAttribute), false))
-                {
-                    ser.Serialize(mi.FieldType, mi.GetValue(ins));                    
-                    serfieldCount++;
-                }
+                throw new Exception("class not inherited from 'IMarkSerializable' " + ft.FullName);
             }
 
-            if (serfieldCount == 0)
-            {
-                throw new Exception("zero serialize " + ft.ToString());
-            }
+            cls.Serialize(ser);
         }
 
 
@@ -43,23 +34,19 @@ namespace MarkSerializer
 
 
             var ins = ft.Assembly.CreateInstance(className);
-
-            int desercount = 0;
-            // 只遍历私有成员
-            foreach (var mi in ins.GetType().GetFields(BindingFlags.NonPublic| BindingFlags.Public | BindingFlags.Instance))
+            if ( ins == null )
             {
-                if (mi.IsDefined(typeof(MarkSerializeAttribute), false))
-                {
-                    var v = ser.Deserialize(mi.FieldType);
-                    mi.SetValue(ins, v);
-                    desercount++;
-                }
+                throw new Exception("class create failed: " + className);
             }
 
-            if (desercount == 0)
+            var cls = ins as IMarkSerializable;
+
+            if (cls == null)
             {
-                throw new Exception("zero deserialize " + ft.ToString());
+                throw new Exception("class not inherited from 'IMarkSerializable'");
             }
+
+            cls.Deserialize(ser);
 
             return ins;
         }
