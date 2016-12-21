@@ -1,55 +1,44 @@
 ﻿using System;
-using System.Reflection;
 
 namespace MarkSerializer
 {
-    
-    class ClassSerializer : BinaryTypeSerializer
+    class ClassSerializer : TypeSerializer
     {
+        public override int Order
+        {
+            get { return 1000; }
+        }
+
         public override bool Match(Type ft)
         {
             return ft.IsClass || ft.IsValueType;
         }
 
-        public override void Serialize(BinarySerializer ser, object ins)
+        public override bool Serialize(BinarySerializer ser, Type ft, ref object obj)
         {
-            Type ft = ins.GetType();
 
-            ser.Serialize<string>(ft.FullName);
-           
-            var cls = ins as IMarkSerializable;
-            if (cls == null)
+            string name;
+
+            if (ser.IsLoading)
             {
-                throw new Exception("class not inherited from 'IMarkSerializable' " + ft.FullName);
+                name = string.Empty;
+                ser.Serialize(ref name);
+            }
+            else
+            {
+                name = ft.FullName;
+                ser.Serialize(ref name);
             }
 
-            cls.Serialize(ser);
-        }
-
-
-
-        public override object Deserialize(BinaryDeserializer ser, Type ft )
-        {
-            var className = ser.Deserialize<string>();
-
-
-            var ins = ft.Assembly.CreateInstance(className);
-            if ( ins == null )
+            if (obj == null)
             {
-                throw new Exception("class create failed: " + className);
+                obj = ft.Assembly.CreateInstance(name);
             }
 
-            var cls = ins as IMarkSerializable;
+            var ins = (IMarkSerializable)obj;
+            ins.Serialize(ser);     
 
-            if (cls == null)
-            {
-                throw new Exception("class not inherited from 'IMarkSerializable'");
-            }
-
-            cls.Deserialize(ser);
-
-            return ins;
+            return true;
         }
     }
-
 }

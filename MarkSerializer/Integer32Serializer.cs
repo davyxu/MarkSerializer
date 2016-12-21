@@ -1,25 +1,32 @@
-﻿using System;
-using System.IO;
-
+﻿
+using System;
 namespace MarkSerializer
 {
-    
-    class Integer32Serializer : BinaryTypeSerializer
+    class Integer32Serializer : TypeSerializer
     {
         public override bool Match(Type ft)
         {
             return ft == typeof(int);
         }
 
-        public override void Serialize(BinarySerializer ser, object ins)
+        public override bool Serialize(BinarySerializer ser, Type ft, ref object obj)
         {
-            ser.Writer.Write((int)ins);
-        }
 
-        public override object Deserialize(BinaryDeserializer ser, Type ft )
-        {
-            return ser.Reader.ReadInt32();
+            if (obj == null)
+            {
+                obj = 0;
+            }
+
+            if (ser.IsLoading)
+            {
+                obj = ser.Reader.ReadInt32();
+            }
+            else
+            {
+                ser.Writer.Write((int)obj);
+            }            
+
+            return true;
         }
     }
-
 }

@@ -2,24 +2,30 @@
 
 namespace MarkSerializer
 {
-    
-    class EnumSerializer : BinaryTypeSerializer
+    class EnumSerializer : TypeSerializer
     {
         public override bool Match(Type ft)
         {
             return ft.IsEnum;
         }
 
-        public override void Serialize(BinarySerializer ser, object ins)
+        public override bool Serialize(BinarySerializer ser, Type ft, ref object obj)
         {
-            ser.Serialize<int>(Convert.ToInt32(ins));
-        }
 
-        public override object Deserialize(BinaryDeserializer ser, Type ft )
-        {
-            var v = ser.Deserialize<int>( );
-            return Enum.ToObject(ft, v);
+            if (ser.IsLoading)
+            {
+                Int32 value = 0;
+                ser.Serialize(ref value);                
+
+                obj = Enum.ToObject(obj.GetType(), value);
+            }
+            else
+            {
+                Int32 value = Convert.ToInt32(obj);
+                ser.Serialize(ref value);
+            }
+
+            return true;
         }
     }
-
 }

@@ -2,43 +2,56 @@
 
 namespace MarkSerializer
 {
-    
-    class ArraySerializer : BinaryTypeSerializer
+    class ArraySerializer : TypeSerializer
     {
         public override bool Match(Type ft)
         {
             return ft.IsArray;
         }
 
-        public override void Serialize(BinarySerializer ser, object ins)
+        public override bool Serialize(BinarySerializer ser, Type ft, ref object obj)
         {
-            var arr = ins as System.Array;
 
-            ser.Serialize<int>(arr.Length);
+            if ( obj == null )
+            {
+                obj = Activator.CreateInstance(ft);
+            }
+
+            var ins = obj as System.Array;
 
             var elementType = ins.GetType().GetElementType();
 
-            for (int i = 0; i < arr.Length; i++)
+            if ( ser.IsLoading )
             {
-                var obj = arr.GetValue(i);
-                ser.Serialize(elementType, obj);                
+                int size = 0;
+                ser.Serialize(ref size);
+
+
+                for (int i = 0; i < size; i++)
+                {
+                    object value = null;
+                    ser.Serialize(elementType, ref value);
+
+                    ins.SetValue( value, i);
+                }
+
             }
-        }
-
-        public override object Deserialize(BinaryDeserializer ser, Type ft )
-        {
-            var size = ser.Deserialize<int>();
-
-            var ins = Activator.CreateInstance(ft, size) as System.Array;
-
-            for (int i = 0; i < size; i++)
+            else
             {
-                var v = ser.Deserialize(ft.GetElementType());
-                ins.SetValue(v, i);
-            }
+                int size = ins.Length;
+                ser.Serialize(ref size);
 
-            return ins;
+                
+
+                for (int i = 0; i < size; i++)
+                {
+                    var value = ins.GetValue(i);                    
+                    ser.Serialize(elementType, ref value);
+                }
+            }
+            
+
+            return true;
         }
     }
-
 }

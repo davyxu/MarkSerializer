@@ -2,23 +2,31 @@
 
 namespace MarkSerializer
 {
-    
-    class Float32Serializer : BinaryTypeSerializer
+    class Float32Serializer : TypeSerializer
     {
         public override bool Match(Type ft)
         {
             return ft == typeof(float);
         }
 
-        public override void Serialize(BinarySerializer ser, object ins)
+        public override bool Serialize(BinarySerializer ser, Type ft, ref object obj)
         {
-            ser.Writer.Write((float)ins);
-        }
 
-        public override object Deserialize(BinaryDeserializer ser, Type ft )
-        {
-            return ser.Reader.ReadSingle();
+            if (obj == null)
+            {
+                obj = 0;
+            }
+
+            if (ser.IsLoading)
+            {
+                obj = ser.Reader.ReadSingle();
+            }
+            else
+            {
+                ser.Writer.Write((float)obj);
+            }        
+
+            return true;
         }
     }
-
 }
